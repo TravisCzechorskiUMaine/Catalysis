@@ -1,0 +1,2 @@
+@ECHO OFF
+start C:\Users\tjcze\anaconda3\pythonw.exe C:\Users\tjcze\anaconda3\cwp.py "C:\Users\tjcze\anaconda3" "C:\Users\tjcze\anaconda3\pythonw.exe" "C:\Users\tjcze\anaconda3\Scripts/spyder-script.py" %1  
