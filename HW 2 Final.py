@@ -198,20 +198,21 @@ AA = A(ve, De, u/NA)     #  1/m
 AAkg = A(ve, De, ukg) #   * NA
 xstart = -1.5E-10 #  m
 xend = 6.5E-10 #  m
-xstep = 1E-13 #  m
+xstep = 1E-14 #  m
 delr = [i for i in np.arange(xstart, xend, xstep)] #  m
 delrnm = [i * (10**9) for i in np.arange(xstart, xend, xstep)] #  nm
 delra = [i * 10 for i in delrnm] #  nm
 VRl = [] #  kJ/mol
-ens = [i for i in range(0, 16, 1)]
-ensb = [i for i in range(0, 16, 1)]
+ens = [i for i in range(0, 25, 1)]
+ensb = [i for i in range(0, 25, 1)]
 Elistl = [En(i, De, h, ve) for i in ens]
 Elistl0 = [Eho(ve, i) for i in ensb]
 kk1 = k1(1.88705191439686622620E10, 7.427E-19) 
 kk2 = k2(ve, ur(Hm, CLm))
 EE = []
 EEF = []
-EL0 = [i/FAC for i in Elistl0]
+ELO = [i/FAC for i in Elistl0]
+ELOint = [int(i/FAC) for i in Elistl0]
 
 for ii in ens:
     Elist = En(ii, De, h, ve)/FAC
@@ -238,17 +239,17 @@ VRlkcm = [i/10 for i in VRlcm]
 Vxlkcm = [i/(100 * 0.01196258739134585) for i in Vxlcm]
 
 DeGraph = DeCm #* 0.011962587391345855
-xgstart = -0.15/10
-xgend1 = 0.65/10
-xgstep1 = 0.05/10
+xgstart = -0.15
+xgend1 = 0.65
+xgstep1 = 0.05
 
-xgstart2 = -1.5/10
-xgend2 = 3.5/10
-xgstep2 = 0.5/10
+xgstart2 = -0.15
+xgend2 = 0.35
+xgstep2 = 0.05
 
-xgstart3 = -0.15/10
-xgend3 = 0.1/10
-xgstep3 = 0.05/10
+xgstart3 = -0.15
+xgend3 = 0.1
+xgstep3 = 0.005
 
 figa = plt.figure()
 plt.plot(delrnm, VRl, color='tab:blue', label=r"$\bf{V(r) = D_{e} * (1 - e^{-a*(r - r_{r})})^2}$")
@@ -261,6 +262,7 @@ plt.xlim([delrnm[0], delrnm[-1]])
 plt.grid()
 figa.savefig("{}\FullGraphHw2.pdf".format(path_fol), bbox_inches='tight')
 figa.savefig("{}\FullGraphHw2.svg".format(path_fol), bbox_inches='tight')
+figa.savefig("{}\FullGraphHw2.png".format(path_fol), bbox_inches='tight')
 plt.show()
 plt.close()
 
@@ -278,6 +280,7 @@ plt.ylim(0, 40000) # VRl[VRV])
 plt.grid()
 figb.savefig("{}\FitGraphHw2.pdf".format(path_fol), bbox_inches='tight')
 figb.savefig("{}\FitGraphHw2.svg".format(path_fol), bbox_inches='tight')
+figb.savefig("{}\FitGraphHw2.png".format(path_fol), bbox_inches='tight')
 plt.show()
 plt.close()
 
@@ -294,20 +297,20 @@ plt.ylim(0, 20)
 plt.grid()
 figc.savefig("{}\ZoomedGraphHw2.pdf".format(path_fol), bbox_inches='tight')
 figc.savefig("{}\ZoomedGraphHw2.svg".format(path_fol), bbox_inches='tight')
+figc.savefig("{}\ZoomedGraphHw2.png".format(path_fol), bbox_inches='tight')
 plt.show()
 plt.close()
 
-figd = plt.figure()
+figd, ax = plt.subplots()
 plt.plot(delrnm, VRl, color='tab:blue', label=r"$\bf{V(r) = D_{e} * (1 - e^{-a*(r - r_{r})})^2}$")
 plt.plot(delrnm, Vxl, color='tab:green', label=r"$\bf{V(r) = \frac{1}{2}*k*(r - r_{r})^2}$")
 
 for ii in ens:
     Elist = En(ii, De, h, ve)
     rm, rp = calc_turning_pts(AAkg, Elistl[ii], re/100, De)
-    rm2, rp2 = calc_turning_pts(AAkg, Elistl0[ii], re/100, De)
-    plt.hlines(Elistl[ii]/FAC, rm*1E9, rp*1E9, colors='b', linestyles='-', lw=1)
-    # plt.hlines(Elistl0[ii]/FAC, 1.2*rm*1E9, 0.325*rp*1E9, colors='g', linestyles='-', lw=2)
-    
+    xv = np.sqrt((Elistl0[ii]/FAC*2)/(2.0*(De)*(AAkg**2)*NA*1E-19))
+    plt.hlines(Elistl[ii]/FAC, rm*1E9, rp*1E9, colors='b', linestyles='-', lw=0.5)
+    plt.hlines(Elistl0[ii]/FAC, -xv, xv, colors='g', linestyles='-', lw=0.5)
 plt.xlabel(r'$\bf{\Delta{R}} \ = \ (r - r_{r})$' + r'$\ _{\it{[nm]}}$')
 plt.ylabel(r'$\bf{V(r)}$' +  r'$\ [\frac{1}{cm}$]')
 plt.legend(loc='best')
@@ -316,7 +319,9 @@ plt.xticks(np.arange(xgstart2, xgend2, step=xgstep2))
 plt.xlim([-0.065, xgend2])
 plt.ylim(0, 40000) # VRl[VRV])
 plt.grid()
-figd.savefig("{}\FitGraphHw2.pdf".format(path_fol), bbox_inches='tight')
-figd.savefig("{}\FitGraphHw2.svg".format(path_fol), bbox_inches='tight')
+figd.savefig("{}\EnergyHw2.pdf".format(path_fol), bbox_inches='tight')
+figd.savefig("{}\EnergyHw2.svg".format(path_fol), bbox_inches='tight')
+figd.savefig("{}\EnergyHw2.png".format(path_fol), bbox_inches='tight')
 plt.show()
 plt.close()
+
