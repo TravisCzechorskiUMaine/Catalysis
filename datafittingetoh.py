@@ -112,7 +112,7 @@ def RHS(t, y, K_1f, K_1b, K_2f, K_2b, K_3tf, K_3tb, K_3f, K_3b, K_4f, K_4b, K_5t
     DθetDt = R3t - R3
     DθaceDt = R3 - R4
     Dθ5tDt = R5t - R5
-    DθohDt = R5 - R5
+    DθohDt = R5 - R6
     return [dETOHDt, daceDt, daceDt, detyDt, dh2Dt, dh20Dt, DθetohDt, DθetoDt, DθhDt, DθetDt, DθaceDt, Dθ5tDt, DθohDt]
 
 
