@@ -91,7 +91,31 @@ def kcols(s0, thetar, T, T0, P, σ, ν, EaA, EaD, Ma,  nn=1):
     kb = -1*ν*(σ**nn)*(thetar**nn)
     return kf, kb
     
-def RHS(t, y, K_1f, K_1b, K_2f, K_2b, K_3tf, K_3tb, K_3f, K_3b, K_4f, K_4b, K_5tf, K_5tb, K_5f, K_5b, K_6f, K_6b, s0, thetar, σ, ν, δE, TOF0, EaA, EaD, T0):
+# def RHS(t, y, K_1f, K_1b, K_2f, K_2b, K_3tf, K_3tb, K_3f, K_3b, K_4f, K_4b, K_5tf, K_5tb, K_5f, K_5b, K_6f, K_6b, s0, thetar, σ, ν, δE, TOF0, EaA, EaD, T0):
+#     ETOH0, ace0, ety0, h220, h200, C_etoh, C_ace, C_ety, C_h2, C_water, θetoh, θeto, θh, θet, θace, θempty, θwatet, θh20, Petoh, Pace, Ph20, T = y
+#     R1 = K_1f*(Petoh**-1)*(θempty**-1) - K_1b*(Petoh)*(θetoh) 
+#     R2 = K_2f*(Petoh**-1)*(θetoh**-1) - K_2b*((Petoh)*(θeto) * (Petoh)*(θh))
+#     R3t = K_3tf*((Petoh**-1)*(θeto**-1) * (Petoh**-1)*(θh**-1)) - K_3tb*(Petoh)*(θet) 
+#     R3 = K_3f*Petoh*θeto
+#     R4 = K_4f*(Pace**-1)*(θace**-1) - K_4b*(Pace)*(θempty)
+#     R5t = K_5tf*(Petoh**-1)*(θetoh**-1) - K_5tb*(Petoh)*(θwatet)
+#     R5 = K_5f*(Petoh)*(θwatet)
+#     R6 = K_6f*(Ph20**-1)*(θh20**-1) * (Ph20**-1)*(θh**-1) - K_6b*(Ph20)*(θempty) 
+#     dETOHDt = ETOH0/t + C_etoh/t - R1
+#     daceDt = ace0/t + C_ace/t + R4
+#     detyDt = ety0/t + C_ety/t + R5
+#     dh2Dt = h220/t + C_h2/t + R3
+#     dh20Dt = h200/t + C_water/t + R6
+#     DθetohDt = R1 + R2 - R5t
+#     DθetoDt = R2 - R3t
+#     DθhDt = R2 + R5 - R3t - R6
+#     DθetDt = R3t - R3
+#     DθaceDt = R3 - R4
+#     Dθ5tDt = R5t - R5
+#     DθohDt = R5 - R6
+#     return [dETOHDt, daceDt, daceDt, detyDt, dh2Dt, dh20Dt, DθetohDt, DθetoDt, DθhDt, DθetDt, DθaceDt, Dθ5tDt, DθohDt]
+
+def RHS(t, y, K_1f, K_1b, K_2f, K_2b, K_3tf, K_3tb, K_3f, K_3b, K_4f, K_4b, K_5tf, K_5tb, K_5f, K_5b, K_6f, K_6b, s0):
     ETOH0, ace0, ety0, h220, h200, C_etoh, C_ace, C_ety, C_h2, C_water, θetoh, θeto, θh, θet, θace, θempty, θwatet, θh20, Petoh, Pace, Ph20, T = y
     R1 = K_1f*(Petoh**-1)*(θempty**-1) - K_1b*(Petoh)*(θetoh) 
     R2 = K_2f*(Petoh**-1)*(θetoh**-1) - K_2b*((Petoh)*(θeto) * (Petoh)*(θh))
@@ -101,11 +125,11 @@ def RHS(t, y, K_1f, K_1b, K_2f, K_2b, K_3tf, K_3tb, K_3f, K_3b, K_4f, K_4b, K_5t
     R5t = K_5tf*(Petoh**-1)*(θetoh**-1) - K_5tb*(Petoh)*(θwatet)
     R5 = K_5f*(Petoh)*(θwatet)
     R6 = K_6f*(Ph20**-1)*(θh20**-1) * (Ph20**-1)*(θh**-1) - K_6b*(Ph20)*(θempty) 
-    dETOHDt = ETOH0/t + C_etoh/t - R1
-    daceDt = ace0/t + C_ace/t + R4
-    detyDt = ety0/t + C_ety/t + R5
-    dh2Dt = h220/t + C_h2/t + R3
-    dh20Dt = h200/t + C_water/t + R6
+    dETOHDt = ETOH0/t + C_etoh/t - R1/s0
+    daceDt = ace0/t + C_ace/t + R4/s0
+    detyDt = ety0/t + C_ety/t + R5/s0
+    dh2Dt = h220/t + C_h2/t + R3/s0
+    dh20Dt = h200/t + C_water/t + R6/s0
     DθetohDt = R1 + R2 - R5t
     DθetoDt = R2 - R3t
     DθhDt = R2 + R5 - R3t - R6
@@ -113,7 +137,9 @@ def RHS(t, y, K_1f, K_1b, K_2f, K_2b, K_3tf, K_3tb, K_3f, K_3b, K_4f, K_4b, K_5t
     DθaceDt = R3 - R4
     Dθ5tDt = R5t - R5
     DθohDt = R5 - R6
-    return [dETOHDt, daceDt, daceDt, detyDt, dh2Dt, dh20Dt, DθetohDt, DθetoDt, DθhDt, DθetDt, DθaceDt, Dθ5tDt, DθohDt]
+    θemptyn = 1.0 - θetoh - θeto - θh - θet - θace - θwatet - θh20
+    return [dETOHDt, daceDt, daceDt, detyDt, dh2Dt, dh20Dt, DθetohDt, DθetoDt, DθhDt, DθetDt, DθaceDt, Dθ5tDt, DθohDt, θemptyn]
+
 
 
 sf = 0.016
