@@ -21,7 +21,7 @@ Github:  https://github.com/tjczec01
 import numpy as np
 import scipy.optimize as optimize
 import matplotlib.pylab as plt
-import math
+import math as mt
 import pprint as pp
 import thermo as tc
 from tqdm import tqdm
@@ -115,7 +115,7 @@ def kcols(s0, thetar, T, T0, P, σ, ν, EaA, EaD, Ma,  nn=1):
 #     DθohDt = R5 - R6
 #     return [dETOHDt, daceDt, daceDt, detyDt, dh2Dt, dh20Dt, DθetohDt, DθetoDt, DθhDt, DθetDt, DθaceDt, Dθ5tDt, DθohDt]
 
-def RHS(t, y, K_1f, K_1b, K_2f, K_2b, K_3tf, K_3tb, K_3f, K_3b, K_4f, K_4b, K_5tf, K_5tb, K_5f, K_5b, K_6f, K_6b, s0):
+def RHS(t, y, K_1f, K_1b, K_2f, K_2b, K_3tf, K_3tb, K_3f, K_3b, K_4f, K_4b, K_5tf, K_5tb, K_5f, K_5b, K_6f, K_6b, s0, 𝜏, V_dot):
     ETOH0, ace0, ety0, h220, h200, C_etoh, C_ace, C_ety, C_h2, C_water, θetoh, θeto, θh, θet, θace, θempty, θwatet, θh20, Petoh, Pace, Ph20, T = y
     R1 = K_1f*(Petoh**-1)*(θempty**-1) - K_1b*(Petoh)*(θetoh) 
     R2 = K_2f*(Petoh**-1)*(θetoh**-1) - K_2b*((Petoh)*(θeto) * (Petoh)*(θh))
@@ -125,11 +125,11 @@ def RHS(t, y, K_1f, K_1b, K_2f, K_2b, K_3tf, K_3tb, K_3f, K_3b, K_4f, K_4b, K_5t
     R5t = K_5tf*(Petoh**-1)*(θetoh**-1) - K_5tb*(Petoh)*(θwatet)
     R5 = K_5f*(Petoh)*(θwatet)
     R6 = K_6f*(Ph20**-1)*(θh20**-1) * (Ph20**-1)*(θh**-1) - K_6b*(Ph20)*(θempty) 
-    dETOHDt = ETOH0/t + C_etoh/t - R1/s0
-    daceDt = ace0/t + C_ace/t + R4/s0
-    detyDt = ety0/t + C_ety/t + R5/s0
-    dh2Dt = h220/t + C_h2/t + R3/s0
-    dh20Dt = h200/t + C_water/t + R6/s0
+    dETOHDt = (V_dot*ETOH0)/𝜏 + (V_dot*C_etoh)/𝜏 - R1/s0
+    daceDt = ace0/𝜏 + C_ace/𝜏 + R4/s0
+    detyDt = ety0/𝜏 + C_ety/𝜏 + R5/s0
+    dh2Dt = h220/𝜏 + C_h2/𝜏 + R3/s0
+    dh20Dt = h200/𝜏 + C_water/𝜏 + R6/s0
     DθetohDt = R1 + R2 - R5t
     DθetoDt = R2 - R3t
     DθhDt = R2 + R5 - R3t - R6
@@ -141,7 +141,54 @@ def RHS(t, y, K_1f, K_1b, K_2f, K_2b, K_3tf, K_3tb, K_3f, K_3b, K_4f, K_4b, K_5t
     return [dETOHDt, daceDt, daceDt, detyDt, dh2Dt, dh20Dt, DθetohDt, DθetoDt, DθhDt, DθetDt, DθaceDt, Dθ5tDt, DθohDt, θemptyn]
 
 
+def RHSb(t, y, K_1f, K_1b, K_2f, K_2b, K_3tf, K_3tb, K_3f, K_3b, K_4f, K_4b, K_5tf, K_5tb, K_5f, K_5b, K_6f, K_6b, 𝜏, s0, V_dot, G_CAT, MMetal, MWMETAL, P):
+    fETOH0, face0, fety0, fh220, fh200, f_etoh, f_ace, f_ety, f_h2, f_water, θetoh, θeto, θh, θet, θace, θempty, θwatet, θh20 = y  #  Petoh, Pace, Ph20
+    ST = (G_CAT/MMetal) * (MWMETAL/s0)
+    FL = [f_etoh, f_ace, f_ety, f_h2, f_water]
+    FT = sum[f_etoh, f_ace, f_ety, f_h2, f_water]
+    Xa = [i/FT for i in FL]
+    PA = [xi*P for xi in Xa]
+    Petoh = PA[0]
+    Pace = PA[1]
+    Ph20 = PA[-1]
+    R1 = K_1f*(Petoh**-1)*(θempty**-1) - K_1b*(Petoh)*(θetoh) 
+    R2 = K_2f*(Petoh**-1)*(θetoh**-1) - K_2b*((Petoh)*(θeto) * (Petoh)*(θh))
+    R3t = K_3tf*((Petoh**-1)*(θeto**-1) * (Petoh**-1)*(θh**-1)) - K_3tb*(Petoh)*(θet) 
+    R3 = K_3f*Petoh*θeto
+    R4 = K_4f*(Pace**-1)*(θace**-1) - K_4b*(Pace)*(θempty)
+    R5t = K_5tf*(Petoh**-1)*(θetoh**-1) - K_5tb*(Petoh)*(θwatet)
+    R5 = K_5f*(Petoh)*(θwatet)
+    R6 = K_6f*(Ph20**-1)*(θh20**-1) * (Ph20**-1)*(θh**-1) - K_6b*(Ph20)*(θempty) 
+    dETOHDt = fETOH0/𝜏 + f_etoh/𝜏 - R1/ST
+    daceDt = face0/𝜏 + f_ace/𝜏 + R4/ST
+    detyDt = fety0/𝜏 + f_ety/𝜏 + R5/ST
+    dh2Dt = fh220/𝜏 + f_h2/𝜏 + R3/ST
+    dh20Dt = fh200/𝜏 + f_water/𝜏 + R6/ST
+    DθetohDt = R1 + R2 - R5t
+    DθetoDt = R2 - R3t
+    DθhDt = R2 + R5 - R3t - R6
+    DθetDt = R3t - R3
+    DθaceDt = R3 - R4
+    Dθ5tDt = R5t - R5
+    DθohDt = R5 - R6
+    θemptyn = 1.0 - θetoh - θeto - θh - θet - θace - θwatet - θh20
+    return [dETOHDt, daceDt, daceDt, detyDt, dh2Dt, dh20Dt, DθetohDt, DθetoDt, DθhDt, DθetDt, DθaceDt, Dθ5tDt, DθohDt, θemptyn]
 
+
+SA = 740  #  m**2/g
+gc = 0.0067  #  g_cat
+saf = gc*SA  #  m**2
+pdia = 0.94  #  nm
+pra = pdia/2  # nm
+pram = pra / 1E9  # m
+PL = saf/(2 * mt.pi * pram)  # m
+TV = mt.pi * pram**2 * PL  #  m**3
+tvcm = TV * 1E6  #  cm**3
+etvf = 4.9507040766778556e-05  #  ml/s
+tau = tvcm / etvf  #  s 
+FETOH0 = 8.483651334592312E-07  #  mol/s
+print(tau)
+print(TV)
 sf = 0.016
 Mg = 24.305
 Si = 28.0855
@@ -149,7 +196,7 @@ O = 15.999
 MgSi = Mg + Si
 gcat = Mg + Si + 3*O
 mmetal = 0.0034966141202839003
-
+gcatmg = 0.0067 * (Mg / gcat)
 dh1 = -29.9
 ds1 = -26.8
 dg1 = -10.5
