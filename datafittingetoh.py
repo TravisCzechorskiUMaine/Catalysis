@@ -175,6 +175,28 @@ def RHSb(t, y, K_1f, K_1b, K_2f, K_2b, K_3tf, K_3tb, K_3f, K_3b, K_4f, K_4b, K_5
     return [dETOHDt, daceDt, daceDt, detyDt, dh2Dt, dh20Dt, DθetohDt, DθetoDt, DθhDt, DθetDt, DθaceDt, Dθ5tDt, DθohDt, θemptyn]
 
 
+
+FET0 = 8.483651334592312e-07  #  mol/s
+FAC0 = 0.0
+FETY0 = 0.0
+FH2_0 = 0.0
+F_water0 = 0.0
+FET = 0.0
+FAC = 0.0
+FETY = 0.0
+FH2 = 0.0
+F_water = 0.0
+θetoh = 0.0
+θeto = 0.0
+θh = 0.0
+θet = 0.0
+θace = 0.0
+θwatet = 0.0
+θh20 = 0.0
+θempty = 1.0
+
+y0 = [FET0, FAC0, FETY0, FH2_0, F_water0, FET, FAC, FETY, FH2, F_water, θetoh, θeto, θh, θet, θace, θwatet, θh20, θempty]
+
 SA = 740  #  m**2/g
 gc = 0.0067  #  g_cat
 saf = gc*SA  #  m**2
